@@ -1,0 +1,44 @@
+- name: Install Vault agent
+  get_url:
+    url: https://releases.hashicorp.com/vault/1.15.0/vault_1.15.0_linux_amd64.zip
+    dest: /tmp/vault.zip
+
+- name: Unzip Vault
+  unarchive:
+    src: /tmp/vault.zip
+    dest: /usr/local/bin/
+    remote_src: yes
+
+- name: Create Vault config directory
+  file:
+    path: /etc/vault
+    state: directory
+
+- name: Copy Vault agent config
+  copy:
+    dest: /etc/vault/agent.hcl
+    content: |
+      pid_file = "/var/run/vault-agent.pid"
+      auto_auth {
+        method "approle" {
+          mount_path = "auth/approle"
+          config = {
+            role_id_file_path = "/etc/vault/role_id"
+            secret_id_file_path = "/etc/vault/secret_id"
+          }
+        }
+      }
+      vault {
+        address = "{{ vault_addr }}"
+      }
+      sink "file" {
+        config = {
+          path = "/etc/vault/token"
+        }
+      }
+
+- name: Enable and start Vault agent
+  systemd:
+    name: vault-agent
+    enabled: yes
+    state: started
