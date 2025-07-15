@@ -1,0 +1,10 @@
+- hosts: all
+  become: yes
+  vars:
+    ipa_admin_user: admin
+    ipa_admin_password: "{{ vault_ipa_admin_password }}"
+    vault_addr: "http://vault.example.org:8200"
+    vault_token: "{{ vault_root_token }}"
+  roles:
+    - freeipa-client
+    - vault-agent
