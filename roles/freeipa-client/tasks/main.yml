@@ -1,0 +1,14 @@
+- name: Install FreeIPA client
+  package:
+    name: freeipa-client
+    state: present
+
+- name: Enroll the host in FreeIPA
+  command: >
+    ipa-client-install --unattended --domain={{ ansible_domain }}
+                      --server={{ ansible_fqdn }}
+                      --principal={{ ipa_admin_user }}
+                      --password={{ ipa_admin_password }}
+                      --mkhomedir
+  args:
+    creates: /etc/ipa/default.conf
